@@ -8,7 +8,7 @@ SECRET_KEY = 'SET UP YOUR SECRET KEY'
 
 ## 引数チェック
 unless ARGV.size == 4
-  puts 'Usage: awssdk_create_snapshot.rb <aws_region_url> <num> <volume_id> <snapshot_description>'
+  puts "Usage: #{$0} <aws_region_url> <num> <volume_id> <snapshot_description>"
   exit 0
 end
 
