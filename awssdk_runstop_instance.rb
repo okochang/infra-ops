@@ -13,7 +13,7 @@ SECRET_KEY = 'SET_UP_YOUR_SECRET_KEY'
 
 ## 引数チェック
 unless ARGV.size == 3
-  puts 'Usage: awssdk_runstop_instance.rb <aws_region_url> <instance-id> <elastic-ip>'
+  puts "Usage: #{$0} <aws_region_url> <instance-id> <elastic-ip>"
   exit 0
 end
 
