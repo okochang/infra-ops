@@ -2,6 +2,9 @@
 require 'rubygems'
 require 'right_aws'
 
+### 使用例
+# ruby rightaws_runstop_dbinstance.rb rds_instance_name db.m1.small security-group parameter_group
+
 ### 事前に指定するパラメータ
 # * RDSのインスタンス名
 # * RDSのインスタンスタイプ
@@ -60,7 +63,7 @@ end
 ## 指定した名前のDBインスタンスが起動していればファイナルスナップショットを所得してDBインスタンスを削除します
 if check_db_instance.size == 0
   rds.restore_db_instance_from_db_snapshot("#{restore_db_snapshot[:aws_id]}", rds_db_instance, params={:instance_class => rds_instance_type})
-  sleep 360
+  sleep 500
   rds.modify_db_instance(rds_db_instance, params={:db_security_groups => rds_security_group, :db_parameter_group => rds_parameter_group, :apply_immediately => true})
 elsif check_db_instance.size != 0
   rds.delete_db_instance(rds_db_instance, params={:snapshot_aws_id => final_db_snapshot})
