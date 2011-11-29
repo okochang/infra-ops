@@ -43,7 +43,7 @@ rds.describe_db_snapshots.each do |dbsnapshot|
   end
 end
 
-## リストア候補のスナップショットをスナップショット作成日時でソートします
+## リストア候補のスナップショットを作成日時でソートします
 sorted_db_snapshots_list = db_snapshots_list.sort do |a, b|
   b[:create_time] <=> a[:create_time]
 end
@@ -60,7 +60,7 @@ rds.describe_db_instances.each do |dbinstance|
 end
 
 ## 指定した名前のDBインスタンスが起動していなければ最新のスナップショットからDBをリストアします
-## 指定した名前のDBインスタンスが起動していればファイナルスナップショットを所得してDBインスタンスを削除します
+## 指定した名前のDBインスタンスが起動していればファイナルスナップショットを作成してDBインスタンスを削除します
 if check_db_instance.size == 0
   rds.restore_db_instance_from_db_snapshot("#{restore_db_snapshot[:aws_id]}", rds_db_instance, params={:instance_class => rds_instance_type})
   sleep 500
