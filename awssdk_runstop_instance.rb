@@ -5,6 +5,7 @@
 # インスタンスのステータスを判定して起動もしくは停止をします
 
 require 'rubygems'
+require 'bundler/setup'
 require 'aws-sdk'
 
 ## アクセスIDとシークレットアクセスキーを指定します。

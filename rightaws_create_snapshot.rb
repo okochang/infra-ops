@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'bundler/setup'
 require 'right_aws'
 require 'nkf'
 require 'net/smtp'

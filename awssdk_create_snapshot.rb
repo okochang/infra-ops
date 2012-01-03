@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'rubygems'
+require 'budler/setup'
 require 'aws-sdk'
 
 ## アクセスIDとシークレットアクセスキーを指定します

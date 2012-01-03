@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'rubygems'
+require 'bundler/setup'
 require 'right_aws'
 
 ### 使用例
