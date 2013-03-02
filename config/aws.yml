@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+
+## AWS SDK for Rubyで各サービスのリージョンを指定する方法一覧
+
+AWS.config(
+  :access_key_id => 'set_your_access_key_id',
+  :secret_access_key => 'set_your_secret_key',
+  :auto_scaling_endpoint => 'autoscaling.ap-northeast-1.amazonaws.com',
+  :cloud_formation_endpoint => 'cloudformation.ap-northeast-1.amazonaws.com',
+  :cloud_front_endpoint => 'cloudfront.amazonaws.com',
+  :cloud_search_endpoint => 'cloudsearch.us-east-1.amazonaws.com',
+  :cloud_watch_endpoint => 'monitoring.ap-southeast-1.amazonaws.com',
+  :data_pipeline_endpoint => 'datapipeline.us-east-1.amazonaws.com',
+  :dynamo_db_endpoint => 'dynamodb.ap-northeast-1.amazonaws.com',
+  :ec2_endpoint => 'ec2.ap-northeast-1.amazonaws.com',
+  :elastic_load_balancing_endpoint => 'elasticloadbalancing.ap-northeast-1.amazonaws.com',
+  :emr_endpoint => 'elasticmapreduce.ap-northeast-1.amazonaws.com',
+  :elasticache_endpoint => 'ec2.ap-northeast-1.amazonaws.com',
+  :elastic_beanstalk_endpoint => 'elasticbeanstalk.ap-northeast-1.amazonaws.com',
+  :elastic_transcoder_endpoint => 'elastictranscoder.ap-northeast-1.amazonaws.com',
+  :glacier_endpoint => 'glacier.ap-northeast-1.amazonaws.com',
+  :iam_endpoint => 'iam.amazonaws.com',
+  :import_export_endpoint => 'importexport.amazonaws.com',
+  :ops_works_endpoint => 'opsworks.us-east-1.amazonaws.com',
+  :rds_endpoint => 'rds.ap-northeast-1.amazonaws.com',
+  :redshift_endpoint => 'redshift.us-east-1.amazonaws.com',
+  :route_53_endpoint => 'route53.amazonaws.com',
+  :s3_endpoint => 's3-ap-northeast-1.amazonaws.com',
+  :sns_endpoint => 'sns.ap-northeast-1.amazonaws.com',
+  :sqs_endpoint => 'sqs.ap-northeast-1.amazonaws.com',
+  :sts_endpoint => 'sts.amazonaws.com',
+  :simple_db_endpoint => 'sdb.ap-northeast-1.amazonaws.com',
+  :simple_email_service_endpoint => 'email.us-east-1.amazonaws.com',
+  :simple_workflow_endpoint => 'swf.ap-northeast-1.amazonaws.com',
+  :storage_gateway_endpoint => 'storagegateway.ap-northeast-1.amazonaws.com',
+)
