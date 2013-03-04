@@ -9,6 +9,6 @@ Amazon Web Servicesの運用を自動化するスクリプトツールです
 ---
 * ruby
 * bundler
-* awssdk
+* aws-sdk
 * right_aws
 
