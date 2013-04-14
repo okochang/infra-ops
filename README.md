@@ -5,7 +5,7 @@ aws-operation
 ----
 Amazon Web Servicesの運用を自動化するスクリプトツールです 
 
-必要なもの
+だいたいこういうのを使って書いています
 ---
 * ruby
 * bundler
