@@ -34,7 +34,6 @@ security_groups.each do |security_group|
   end
 
   puts "|" + group_name + "|" + group_id + "|" + vpc_id + "|"
-  puts "\n"
   puts "|\'\'プロトコル\'\'|\'\'ポート番号\'\'|\'\'接続元\'\'|"
   security_group[:ip_permissions].each do |ip_permission|
     protocol = ip_permission[:ip_protocol]
