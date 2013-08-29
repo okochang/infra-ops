@@ -31,9 +31,9 @@ instances_information.each_value do |value|
     if tag[:key] == "Name"
       name_tag << tag[:value]
     end
-    if name_tag[0] == nil
-      name_tag[0] = " "
-    end
+  end
+  if name_tag[0] == nil
+    name_tag[0] = " "
   end
   ## ルートボリュームの種類とEBSだった場合のサイズを判定する
   volumes = value[:block_device_mapping]
