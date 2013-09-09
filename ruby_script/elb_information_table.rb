@@ -15,7 +15,7 @@ elb = AWS::ELB.new(
 elbs = elb.describe_load_balancers[:load_balancer_descriptions]
 
 ## ELBテーブルのタイトルを出力します
-puts "|名前|接続先|VPC ID|セキュリティグループ|AZ|ロードバランサポート|サーバーポート|h"
+puts "|名前|接続先|VPC ID|セキュリティグループ|AZ|死活監視プロトコル|ロードバランサポート|サーバーポート|h"
 
 ## 各ELBの情報でテーブル作成に必要な情報をそれぞれ出力します。
 elbs.each do |lb|
@@ -32,6 +32,7 @@ elbs.each do |lb|
   name = lb[:load_balancer_name]
   dns_name = lb[:dns_name]
   az = lb[:availability_zones]
+  health_check_protocol = lb[:health_check][:target]
   lb_port = []
   lb[:listener_descriptions].each do |description|
     lb_port << description[:listener][:load_balancer_port]
@@ -40,5 +41,5 @@ elbs.each do |lb|
   lb[:listener_descriptions].each do |description|
     instance_port << description[:listener][:instance_port]
   end
-  puts  "|" + name + "|" + dns_name + "|" + vpc_id + "|" + source_security_group + "|" + az.join(",") + "|" + lb_port.join(",") + "|" + instance_port.join(",") + "|"
+  puts  "|" + name + "|" + dns_name + "|" + vpc_id + "|" + source_security_group + "|" + az.join(",") + "|" + health_check_protocol + "|" + lb_port.join(",") + "|" + instance_port.join(",") + "|"
 end
