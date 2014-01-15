@@ -14,7 +14,7 @@ generation  = 3
 class InstanaceDatas
  
   def initialize(ec2_region, instance_id)
-    @ec2 = AWS::EC2.new(:ec2_endpoint => ec2_region).client
+    @ec2 = AWS::EC2.new(ec2_endpoint: ec2_region).client
     @instance_datas = @ec2.describe_instances(
       :instance_ids => [instance_id]
     )[:instance_index][instance_id]
@@ -72,7 +72,7 @@ end
 class InstanceAttributes
 
   def initialize(ec2_region)
-    @ec2 = AWS::EC2.new(:ec2_endpoint => ec2_region).client
+    @ec2 = AWS::EC2.new(ec2_endpoint: ec2_region).client
   end
 
   def get_api_termination(instance_id)
@@ -94,8 +94,8 @@ end
 class AmiBackup
 
   def initialize(ec2_region, sdb_region)
-    @ec2 = AWS::EC2.new(:ec2_endpoint => ec2_region).client
-    @sdb = AWS::SimpleDB.new(:simple_db_endpoint => sdb_region).client
+    @ec2 = AWS::EC2.new(ec2_endpoint: ec2_region).client
+    @sdb = AWS::SimpleDB.new(simple_db_endpoint: sdb_region).client
   end
 
   def create_image(instance_id, image_name, description)
