@@ -110,7 +110,7 @@ class AmiBackup
 
   def image_status(image_id)
     30.times do
-      if @ec2.describe_images(:image_ids => [image_id])[:images_set][0][:image_state] == "available"
+      if @ec2.describe_images(image_ids: ["#{image_id}"])[:images_set][0][:image_state] == "available"
         puts "Image status became availabled"
         break
       else
@@ -124,18 +124,18 @@ class AmiBackup
       :domain_name => domain_name,
       :item_name => image_id,
       :attributes => [
-        { :name => "instance_type", :value => tag_datas[:instance_type]},
-        { :name => "subnet_id", :value => tag_datas[:subnet_id]},
-        { :name => "local_ip_address", :value => tag_datas[:local_ip_address] },
-        { :name => "key_name", :value => tag_datas[:key_name] },
-        { :name => "security_group_ids", :value => tag_datas[:security_group_ids].join(" ") },
-        { :name => "source_dest_check", :value => tag_datas[:source_dest_check].to_s},
-        { :name => "disable_api_termination", :value => tag_datas[:disaable_api_termination].to_s },
-        { :name => "monitoring", :value => tag_datas[:monitoring] },
-        { :name => "iam_instance_profile", :value => tag_datas[:iam_instance_profile] },
-        { :name => "tag_set", :value => tag_datas[:tag_set].join(" ") },
-        { :name => "instance_initiated_shutdown_behavior", :value => tag_datas[:instance_initiated_shutdown_behavior].to_s },
-        { :name => "vpc_id", :value => tag_datas[:vpc_id] }
+        { name: "instance_type", value: tag_datas[:instance_type]},
+        { name: "subnet_id", value: tag_datas[:subnet_id]},
+        { name: "local_ip_address", value: tag_datas[:local_ip_address] },
+        { name: "key_name", value: tag_datas[:key_name] },
+        { name: "security_group_ids", value: tag_datas[:security_group_ids].join(" ") },
+        { name: "source_dest_check", value: tag_datas[:source_dest_check].to_s},
+        { name: "disable_api_termination", value: tag_datas[:disaable_api_termination].to_s },
+        { name: "monitoring", value: tag_datas[:monitoring] },
+        { name: "iam_instance_profile", value: tag_datas[:iam_instance_profile] },
+        { name: "tag_set", value: tag_datas[:tag_set].join(" ") },
+        { name: "instance_initiated_shutdown_behavior", value: tag_datas[:instance_initiated_shutdown_behavior].to_s },
+        { name: "vpc_id", value: tag_datas[:vpc_id] }
       ])
     puts "Putted tags to simpledb"
   end
@@ -143,7 +143,7 @@ class AmiBackup
   def get_deleted_image(instance_id, generation)
     image_list = @ec2.describe_images(
       :owners => ["self"],
-      :filters => [{:name => 'name', :values => [instance_id + '-*']}]
+      :filters => [{name: 'name', values: ["#{instance_id} + -*"]}]
     )[:images_set].sort { |a,b| b[:name] <=> a[:name] }
     delete_target = image_list[generation.to_i, image_list.length]
   end
@@ -152,9 +152,9 @@ class AmiBackup
     unless deleted_image_ids.nil?
       puts "Remove old images"
       deleted_image_ids.each do |image|
-        @ec2.deregister_image(:image_id => image[:image_id])
+        @ec2.deregister_image(image_id: image[:image_id])
         image[:block_device_mapping].each do |device|
-          @ec2.delete_snapshot(:snapshot_id => device[:ebs][:snapshot_id])
+          @ec2.delete_snapshot(snapshot_id: device[:ebs][:snapshot_id])
         end
       end
     else
@@ -167,7 +167,7 @@ class AmiBackup
     unless deleted_image_ids.nil?
       puts "Removed old image's item from simpledb"
       deleted_image_ids.each do |image|
-        @sdb.delete_attributes(:domain_name => domain_name, :item_name => image[:image_id])
+        @sdb.delete_attributes(domain_name: domain_name, item_name: image[:image_id])
       end
     else
       puts "No image to be deleted"
