@@ -11,68 +11,14 @@ domain_name = 'ami_backup'
 description = 'automatically generated image'
 generation  = 3
 
-class InstanaceDatas
- 
-  def initialize(ec2_region, instance_id)
-    @ec2 = AWS::EC2.new(ec2_endpoint: ec2_region).client
-    @instance_datas = @ec2.describe_instances(
-      :instance_ids => [instance_id]
-    )[:instance_index][instance_id]
-  end
-
-  def get_instance_type
-    @instance_datas[:instance_type]
-  end
-
-  def get_availability_zone
-    @instance_datas[:placement][:availability_zone]
-  end
-
-  def get_vpc_id
-    @instance_datas[:vpc_id]
-  end
-
-  def get_subnet_id
-    @instance_datas[:subnet_id]
-  end
-
-  def get_local_ip_address
-    @instance_datas[:private_ip_address]
-  end
-
-  def get_security_group_ids
-    security_group_ids = []
-    @instance_datas[:group_set].each do |group_set|
-      security_group_ids << group_set[:group_id]
-    end
-    return security_group_ids
-  end
-
-  def get_source_dest_check
-    @instance_datas[:source_dest_check]
-  end
-
-  def get_monitoring
-    @instance_datas[:monitoring][:state]
-  end
-
-  def get_iam_instance_profile
-    @instance_datas[:iam_instance_profile][:arn]
-  end
-
-  def get_tag_set
-    @instance_datas[:tag_set]
-  end
-
-  def get_key_name
-    @instance_datas[:key_name]
-  end
-end
-
-class InstanceAttributes
+class Ec2Base
 
   def initialize(ec2_region)
     @ec2 = AWS::EC2.new(ec2_endpoint: ec2_region).client
+  end
+ 
+  def get_instance_datas(instance_id)
+    @ec2.describe_instances(instance_ids: ["#{instance_id}"])[:instance_index][instance_id]
   end
 
   def get_api_termination(instance_id)
@@ -87,15 +33,6 @@ class InstanceAttributes
       :instance_id => instance_id,
       :attribute   => "instanceInitiatedShutdownBehavior"
     )[:instance_initiated_shutdown_behavior][:value]
-  end
-
-end
-
-class AmiBackup
-
-  def initialize(ec2_region, sdb_region)
-    @ec2 = AWS::EC2.new(ec2_endpoint: ec2_region).client
-    @sdb = AWS::SimpleDB.new(simple_db_endpoint: sdb_region).client
   end
 
   def create_image(instance_id, image_name, description)
@@ -119,31 +56,10 @@ class AmiBackup
     end
   end
 
-  def put_tags_to_simpledb(image_id, tag_datas, domain_name)
-    @sdb.put_attributes(
-      :domain_name => domain_name,
-      :item_name => image_id,
-      :attributes => [
-        { name: "instance_type", value: tag_datas[:instance_type]},
-        { name: "subnet_id", value: tag_datas[:subnet_id]},
-        { name: "local_ip_address", value: tag_datas[:local_ip_address] },
-        { name: "key_name", value: tag_datas[:key_name] },
-        { name: "security_group_ids", value: tag_datas[:security_group_ids].join(" ") },
-        { name: "source_dest_check", value: tag_datas[:source_dest_check].to_s},
-        { name: "disable_api_termination", value: tag_datas[:disaable_api_termination].to_s },
-        { name: "monitoring", value: tag_datas[:monitoring] },
-        { name: "iam_instance_profile", value: tag_datas[:iam_instance_profile] },
-        { name: "tag_set", value: tag_datas[:tag_set].join(" ") },
-        { name: "instance_initiated_shutdown_behavior", value: tag_datas[:instance_initiated_shutdown_behavior].to_s },
-        { name: "vpc_id", value: tag_datas[:vpc_id] }
-      ])
-    puts "Putted tags to simpledb"
-  end
-
   def get_deleted_image(instance_id, generation)
     image_list = @ec2.describe_images(
       :owners => ["self"],
-      :filters => [{name: 'name', values: ["#{instance_id} + -*"]}]
+      :filters => [{name: 'name', values: ["#{instance_id}" + "-*"]}]
     )[:images_set].sort { |a,b| b[:name] <=> a[:name] }
     delete_target = image_list[generation.to_i, image_list.length]
   end
@@ -163,7 +79,36 @@ class AmiBackup
     end
   end
 
-  def delete_tags_from_simpledb(domain_name, deleted_image_ids)
+end
+
+class SimpledbBase
+
+  def initialize(sdb_region)
+    @sdb = AWS::SimpleDB.new(simple_db_endpoint: sdb_region).client
+  end
+  
+  def put_data_to_simpledb(image_id, insert_datas, domain_name)
+    @sdb.put_attributes(
+      :domain_name => domain_name,
+      :item_name => image_id,
+      :attributes => [
+        { name: "instance_type",                        value: insert_datas[:instance_type]},
+        { name: "subnet_id",                            value: insert_datas[:subnet_id]},
+        { name: "local_ip_address",                     value: insert_datas[:local_ip_address] },
+        { name: "key_name",                             value: insert_datas[:key_name] },
+        { name: "security_group_ids",                   value: insert_datas[:security_group_ids].join(" ") },
+        { name: "source_dest_check",                    value: insert_datas[:source_dest_check].to_s},
+        { name: "disable_api_termination",              value: insert_datas[:disaable_api_termination].to_s },
+        { name: "monitoring",                           value: insert_datas[:monitoring] },
+        { name: "iam_instance_profile",                 value: insert_datas[:iam_instance_profile] },
+        { name: "tag_set",                              value: insert_datas[:tag_set].join(" ") },
+        { name: "instance_initiated_shutdown_behavior", value: insert_datas[:instance_initiated_shutdown_behavior].to_s },
+        { name: "vpc_id",                               value: insert_datas[:vpc_id] }
+      ])
+    puts "Putted tags to simpledb"
+  end
+  
+  def delete_data_from_simpledb(domain_name, deleted_image_ids)
     unless deleted_image_ids.nil?
       puts "Removed old image's item from simpledb"
       deleted_image_ids.each do |image|
@@ -174,35 +119,41 @@ class AmiBackup
       exit0
     end
   end
- 
+  
 end
 
 # AMIのタグに必要な情報を取得する
-ec2_instance_datas  = InstanaceDatas.new(ec2_region, instance_id)
-ec2_instance_attributes = InstanceAttributes.new(ec2_region)
-tag_datas = Hash.new
-tag_datas[:instance_type]            = ec2_instance_datas.get_instance_type
-tag_datas[:availability_zone]        = ec2_instance_datas.get_availability_zone
-tag_datas[:iam_instance_profile]     = ec2_instance_datas.get_iam_instance_profile
-tag_datas[:instance_type]            = ec2_instance_datas.get_instance_type
-tag_datas[:key_name]                 = ec2_instance_datas.get_key_name
-tag_datas[:local_ip_address]         = ec2_instance_datas.get_local_ip_address
-tag_datas[:monitoring]               = ec2_instance_datas.get_monitoring
-tag_datas[:security_group_ids]       = ec2_instance_datas.get_security_group_ids
-tag_datas[:source_dest_check]        = ec2_instance_datas.get_source_dest_check
-tag_datas[:subnet_id]                = ec2_instance_datas.get_subnet_id
-tag_datas[:tag_set]                  = ec2_instance_datas.get_tag_set
-tag_datas[:vpc_id]                   = ec2_instance_datas.get_vpc_id
-tag_datas[:disaable_api_termination] = ec2_instance_attributes.get_api_termination(instance_id)
-tag_datas[:shutdown_behavior]        = ec2_instance_attributes.get_shutdown_behavior(instance_id)
+ec2  = Ec2Base.new(ec2_region)
+insert_datas = Hash.new
+instance_datas = ec2.get_instance_datas(instance_id)
+security_group_ids = []
 
-## AMIとItemを作成
-backup = AmiBackup.new(ec2_region, sdb_region)
-image_id = backup.create_image(instance_id, image_name, description)
-backup.image_status(image_id)
-backup.put_tags_to_simpledb(image_id, tag_datas, domain_name)
+insert_datas[:instance_type]            = instance_datas[:instance_type]
+insert_datas[:availability_zone]        = instance_datas[:placement][:availability_zone]
+insert_datas[:iam_instance_profile]     = instance_datas[:iam_instance_profile][:arn]
+insert_datas[:instance_type]            = instance_datas[:instance_type]
+insert_datas[:key_name]                 = instance_datas[:key_name]
+insert_datas[:local_ip_address]         = instance_datas[:private_ip_address]
+insert_datas[:monitoring]               = instance_datas[:monitoring][:state]
+insert_datas[:security_group_ids]       = instance_datas[:group_set].each {|group_set| security_group_ids << group_set[:group_id]}
+insert_datas[:source_dest_check]        = instance_datas[:source_dest_check]
+insert_datas[:subnet_id]                = instance_datas[:subnet_id]
+insert_datas[:tag_set]                  = instance_datas[:tag_set]
+insert_datas[:vpc_id]                   = instance_datas[:vpc_id]
+insert_datas[:disaable_api_termination] = ec2.get_api_termination(instance_id)
+insert_datas[:shutdown_behavior]        = ec2.get_shutdown_behavior(instance_id)
+
+## AMIを作成
+image_id = ec2.create_image(instance_id, image_name, description)
+
+ec2.image_status(image_id)
+
+## SimpleDBにインスタンスの情報を入れる
+sdb = SimpledbBase.new(sdb_region)
+sdb.put_data_to_simpledb(image_id, insert_datas, domain_name)
 
 ## 不要なAMIとItemを削除
-deleted_image_ids = backup.get_deleted_image(instance_id, generation)
-backup.delete_image(deleted_image_ids)
-backup.delete_tags_from_simpledb(domain_name, deleted_image_ids)
+deleted_image_ids = ec2.get_deleted_image(instance_id, generation)
+ec2.delete_image(deleted_image_ids)
+sdb.delete_data_from_simpledb(domain_name, deleted_image_ids)
+
