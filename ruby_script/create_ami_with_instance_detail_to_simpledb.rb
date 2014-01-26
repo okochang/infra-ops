@@ -23,25 +23,25 @@ class Ec2Base
 
   def get_api_termination(instance_id)
     @ec2.describe_instance_attribute(
-      :instance_id => instance_id,
-      :attribute   => "disableApiTermination"
+      instance_id: instance_id,
+      attribute: "disableApiTermination"
     )[:disable_api_termination][:value]
   end
 
   def get_shutdown_behavior(instance_id)
     @ec2.describe_instance_attribute(
-      :instance_id => instance_id,
-      :attribute   => "instanceInitiatedShutdownBehavior"
+      instance_id: instance_id,
+      attribute: "instanceInitiatedShutdownBehavior"
     )[:instance_initiated_shutdown_behavior][:value]
   end
 
   def create_image(instance_id, image_name, description)
     puts "Start image creation"
     @ec2.create_image(
-      :instance_id => instance_id,
-      :name        => image_name,
-      :description => description,
-      :no_reboot   => true
+      instance_id: instance_id,
+      name: image_name,
+      description: description,
+      no_reboot: true
     )[:image_id]
   end
 
@@ -58,8 +58,8 @@ class Ec2Base
 
   def get_deleted_image(instance_id, generation)
     image_list = @ec2.describe_images(
-      :owners => ["self"],
-      :filters => [{name: 'name', values: ["#{instance_id}" + "-*"]}]
+      owners: ["self"],
+      filters: [{name: 'name', values: ["#{instance_id}" + "-*"]}]
     )[:images_set].sort { |a,b| b[:name] <=> a[:name] }
     delete_target = image_list[generation.to_i, image_list.length]
   end
@@ -89,9 +89,9 @@ class SimpledbBase
   
   def put_data_to_simpledb(image_id, insert_datas, domain_name)
     @sdb.put_attributes(
-      :domain_name => domain_name,
-      :item_name => image_id,
-      :attributes => [
+      domain_name: domain_name,
+      item_name: image_id,
+      attributes: [
         { name: "instance_type",                        value: insert_datas[:instance_type]},
         { name: "subnet_id",                            value: insert_datas[:subnet_id]},
         { name: "local_ip_address",                     value: insert_datas[:local_ip_address] },
