@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": ["s3:ListAllMyBuckets", "s3:GetBucketLocation"],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:s3:::*"],
+      "Condition":{"IpAddress":{"aws:SourceIp":"0.0.0.0/0"}}
+    },
+    {
+      "Action": ["s3:ListBucket"],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:s3:::okochang-test"],
+      "Condition":{"StringEquals":{"s3:prefix":["","foo/"],"s3:delimiter":["/"]},"IpAddress":{"aws:SourceIp":"0.0.0.0/0"}}
+     },
+    {
+       "Action":["s3:DeleteObject", "s3:GetObject", "s3:PutObject"],
+       "Effect":"Allow",
+       "Resource": ["arn:aws:s3:::okochang-test/foo","arn:aws:s3:::okochang-test/foo/*"],
+       "Condition":{"IpAddress":{"aws:SourceIp":"0.0.0.0/0"}}
+    }
+  ]
+}
