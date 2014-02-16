@@ -3,16 +3,16 @@ require 'net/http'
 require 'aws-sdk'
 
 ## 自分自身の情報を取得する
-ec2_region  = 'ec2.' + Net::HTTP.get('169.254.169.254', '/latest/meta-data/placement/availability-zone').chop + '.amazonaws.com'
+ec2_region  = "ec2.#{Net::HTTP.get('169.254.169.254', '/latest/meta-data/placement/availability-zone').chop}.amazonaws.com"
 instance_id = Net::HTTP.get('169.254.169.254', '/latest/meta-data/instance-id')
-image_name  = instance_id + '-' + Time.now.strftime("%Y%m%d%H%M")
+image_name  = "#{instance_id}-#{Time.now.strftime("%Y%m%d%H%M")}"
 description = "automatically generated image"
 generation  = 3
 
 class InstanaceDatas
  
   def initialize(ec2_region, instance_id)
-    @ec2 = AWS::EC2.new(:ec2_endpoint => ec2_region).client
+    @ec2 = AWS::EC2.new(ec2_endpoint: ec2_region).client
     @instance_datas = @ec2.describe_instances(
       :instance_ids => [instance_id]
     )[:instance_index][instance_id]
@@ -75,15 +75,15 @@ class InstanceAttributes
 
   def get_api_termination(instance_id)
     @ec2.describe_instance_attribute(
-      :instance_id => instance_id,
-      :attribute   => "disableApiTermination"
+      instance_id: instance_id,
+      attribute: "disableApiTermination"
     )[:disable_api_termination][:value]
   end
 
   def get_shutdown_behavior(instance_id)
     @ec2.describe_instance_attribute(
-      :instance_id => instance_id,
-      :attribute   => "instanceInitiatedShutdownBehavior"
+      instance_id: instance_id,
+      attribute: "instanceInitiatedShutdownBehavior"
     )[:instance_initiated_shutdown_behavior][:value]
   end
 
@@ -92,21 +92,21 @@ end
 class AmiBackup
 
   def initialize(ec2_region)
-    @ec2 = AWS::EC2.new(:ec2_endpoint => ec2_region).client
+    @ec2 = AWS::EC2.new(ec2_endpoint: ec2_region).client
   end
 
   def create_image(instance_id, image_name, description)
     @ec2.create_image(
-      :instance_id => instance_id,
-      :name        => image_name,
-      :description => description,
-      :no_reboot   => true
+      instance_id: instance_id,
+      name:        image_name,
+      description: description,
+      no_reboot:   true
     )[:image_id]
   end
 
   def image_status(image_id)
     30.times do
-      if @ec2.describe_images(:image_ids => [image_id])[:images_set][0][:image_state] == "available"
+      if @ec2.describe_images(:image_ids ["#{image_id}"])[:images_set][0][:image_state] == "available"
         puts "done"
         break
       else
@@ -119,27 +119,27 @@ class AmiBackup
     @ec2.create_tags(
       :resources => [image_id],
       :tags => [
-        { :key => "instance_type", :value => tag_datas[:instance_type] },
-        { :key => "subnet_id", :value => tag_datas[:subnet_id] },
-        { :key => "local_ip_address", :value => tag_datas[:local_ip_address] },
-        { :key => "key_name", :value => tag_datas[:key_name] },
-        { :key => "security_group_ids", :value => tag_datas[:security_group_ids].join(" ") },
-        { :key => "source_dest_check", :value => tag_datas[:source_dest_check].to_s },
-        { :key => "disable_api_termination", :value => tag_datas[:disaable_api_termination].to_s },
-        { :key => "monitoring", :value => tag_datas[:monitoring] },
-        { :key => "iam_instance_profile", :value => tag_datas[:iam_instance_profile] },
-        { :key => "tag_set", :value => tag_datas[:tag_set].join(" ") }
+        { key: "instance_type", value: tag_datas[:instance_type] },
+        { key: "subnet_id", value: tag_datas[:subnet_id] },
+        { key: "local_ip_address", value: tag_datas[:local_ip_address] },
+        { key: "key_name", value: tag_datas[:key_name] },
+        { key: "security_group_ids", value: tag_datas[:security_group_ids].join(" ") },
+        { key: "source_dest_check", value: tag_datas[:source_dest_check].to_s },
+        { key: "disable_api_termination", value: tag_datas[:disaable_api_termination].to_s },
+        { key: "monitoring", value: tag_datas[:monitoring] },
+        { key: "iam_instance_profile", value: tag_datas[:iam_instance_profile] },
+        { key: "tag_set", value: tag_datas[:tag_set].join(" ") }
         ## 上限で以下のものはタグにつけられなかった
-        # { :key => "instance_initiated_shutdown_behavior", :value => tag_datas[:instance_initiated_shutdown_behavior] }
-        # { :key => "vpc_id", :value => tag_datas[:vpc_id] }
+        # { key: "instance_initiated_shutdown_behavior", value: tag_datas[:instance_initiated_shutdown_behavior] }
+        # { key: "vpc_id", value: tag_datas[:vpc_id] }
       ]
     )
   end
 
   def delete_images(instance_id, generation)
     image_list = @ec2.describe_images(
-      :owners => ["self"],
-      :filters => [{:name => 'name', :values => [instance_id + '-*']}]
+      owners: ["self"],
+      filters: ["{name: \"name\", values: [\"#{instance_id}-*\"]}"]
     )[:images_set]
     sorted_list = image_list.sort { |a,b| b[:name] <=> a[:name] }
     delete_target = sorted_list[generation.to_i, sorted_list.length]

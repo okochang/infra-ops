@@ -3,8 +3,8 @@ require 'net/http'
 require 'aws-sdk'
 
 instance_id = Net::HTTP.get('169.254.169.254', '/latest/meta-data/instance-id')
-ec2_region = 'ec2.' + Net::HTTP.get('169.254.169.254', '/latest/meta-data/placement/availability-zone').chop + '.amazonaws.com'
-image_name = instance_id + '-' + Time.now.strftime("%Y%m%d%H%M")
+ec2_region = "ec2.#{Net::HTTP.get('169.254.169.254', '/latest/meta-data/placement/availability-zone').chop}.amazonaws.com"
+image_name = "#{instance_id}-#{Time.now.strftime("%Y%m%d%H%M")}"
 comment = "automatically generated image"
  
 @ec2 = AWS::EC2.new(
@@ -13,15 +13,13 @@ comment = "automatically generated image"
 
 ## インスタンスの対象からタグを取得する
 def check_tag_set(instance_id)
-  tag_set = @ec2.describe_instances(:instance_ids => [instance_id])[:instance_index][instance_id][:tag_set]
-  return tag_set
+  tag_set = @ec2.describe_instances(instance_ids: ["#{instance_id}"])[:instance_index][instance_id][:tag_set]
 end
 
 ## 取得したタグからバックアップの設定を確認します
 def check_backup_config(instance_id)
   backup_config = Hash.new
-  tag_set = check_tag_set(instance_id)
-  tag_set.each do |tag|
+  check_tag_set(instance_id).each do |tag|
     if tag[:key] == 'backup' && tag[:value] == 'on'
       backup_config[:flag] = true
     end

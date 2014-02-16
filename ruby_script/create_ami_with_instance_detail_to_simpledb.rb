@@ -3,10 +3,10 @@ require 'net/http'
 require 'aws-sdk'
 
 ## 自分自身の情報を取得する
-ec2_region  = 'ec2.' + Net::HTTP.get('169.254.169.254', '/latest/meta-data/placement/availability-zone').chop + '.amazonaws.com'
-sdb_region  = 'sdb.' + Net::HTTP.get('169.254.169.254', '/latest/meta-data/placement/availability-zone').chop + '.amazonaws.com'
+ec2_region  = "ec2.#{Net::HTTP.get('169.254.169.254', '/latest/meta-data/placement/availability-zone').chop}.amazonaws.com"
+sdb_region  = "sdb.#{Net::HTTP.get('169.254.169.254', '/latest/meta-data/placement/availability-zone').chop}.amazonaws.com"
 instance_id = Net::HTTP.get('169.254.169.254', '/latest/meta-data/instance-id')
-image_name  = instance_id + '-' + Time.now.strftime("%Y%m%d%H%M")
+image_name  = "#{instance_id}-#{Time.now.strftime("%Y%m%d%H%M")}"
 domain_name = 'ami_backup'
 description = 'automatically generated image'
 generation  = 3
