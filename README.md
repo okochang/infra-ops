@@ -1,14 +1,16 @@
-aws-operation
+infra-ops
 ====
 
 概要
 ----
-Amazon Web Servicesの運用を自動化するスクリプトツールです 
+infra関連のスクリプトやツールなどを管理するリポジトリ
 
-だいたいこういうのを使って書いています
+だいたいこういうのを使っています
 ---
-* ruby
-* bundler
-* aws-sdk
-* right_aws
+* Ruby
+* AWS SDK for Ruby
+* Shell Script
+* Chef
+* Puppet
+* serverspec
 
