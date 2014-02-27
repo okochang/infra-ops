@@ -1,0 +1,83 @@
+mod_fcgiのrpm作る
+
+# yum -y groupinstall "Development Tools" "Development Libraries"
+# yum -y update
+# yum -y install httpd-devel
+# yum -y install tree
+# cd /usr/local/src/
+# wget "http://ftp.iij.ad.jp/pub/linux/fedora/releases/16/Everything/source/SRPMS/mod_fcgid-2.3.6-3.fc15.src.rpm"
+# rpm -ivh --nomd5 ./mod_fcgid-2.3.6-3.fc15.src.rpm 
+# cd /usr/src/redhat/
+# grep ^Version /usr/src/redhat/SPECS/mod_fcgid.spec 
+Version:	2.3.6
+# grep ^Patch /usr/src/redhat/SPECS/mod_fcgid.spec 
+Patch0:		mod_fcgid-2.3.4-fixconf-shellbang.patch
+# ll /usr/src/redhat/SOURCES/
+合計 112
+-rw-r--r-- 1 root root  2721  2月  9  2011 fastcgi-2.5.te
+-rw-r--r-- 1 root root    77  2月  9  2011 fastcgi.fc
+-rw-r--r-- 1 root root  2900  2月  9  2011 fastcgi.te
+-rw-r--r-- 1 root root   455  2月  9  2011 fcgid.conf
+-rw-r--r-- 1 root root  2312  2月  9  2011 mod_fcgid-2.1-README.RPM
+-rw-r--r-- 1 root root  2502  2月  9  2011 mod_fcgid-2.1-README.SELinux
+-rw-r--r-- 1 root root   344  2月  9  2011 mod_fcgid-2.3.4-fixconf-shellbang.patch
+-rw-rw-r-- 1 root root 76357 11月  5  2010 mod_fcgid-2.3.6.tar.bz2
+-rw-r--r-- 1 root root    38  2月  9  2011 mod_fcgid-tmpfs.conf
+# grep ^BuildRequires /usr/src/redhat/SPECS/mod_fcgid.spec 
+BuildRequires:	httpd-devel >= 2.0, pkgconfig
+BuildRequires:	  %{selinux_buildreqs}
+# cd ./SPECS/
+# time rpmbuild -bb --clean ./mod_fcgid.spec 
+real	0m21.277s
+user	0m6.560s
+sys	0m3.964s
+# cd ..
+# tree 
+.
+|-- BUILD
+|-- RPMS
+|   |-- athlon
+|   |-- geode
+|   |-- i386
+|   |   |-- mod_fcgid-2.3.6-3.i386.rpm
+|   |   `-- mod_fcgid-debuginfo-2.3.6-3.i386.rpm
+|   |-- i486
+|   |-- i586
+|   |-- i686
+|   `-- noarch
+|-- SOURCES
+|   |-- fastcgi-2.5.te
+|   |-- fastcgi.fc
+|   |-- fastcgi.te
+|   |-- fcgid.conf
+|   |-- mod_fcgid-2.1-README.RPM
+|   |-- mod_fcgid-2.1-README.SELin|   |-- mod_fcgid-2.3.4-fixconf-shellbang.patch
+|   |-- mod_fcgid-2.3.6.tar.bz2
+|   `-- mod_fcgid-tmpfs.conf
+|-- SPECS
+|   `-- mod_fcgid.spec
+`-- SRPMS
+
+12 directories, 12 files
+
+# cd ./RPMS/i386/
+# rpm -ivh ./mod_fcgid-*
+準備中...                ########################################### [100%]
+   1:mod_fcgid-debuginfo    ########################################### [ 50%]
+   2:mod_fcgid              ########################################### [100%]
+
+
+fastcgiをつくる
+# cd /usr/local/src/
+# wget http://ftp.iij.ad.jp/pub/linux/fedora/releases/15/Fedora/source/SRPMS/fcgi-2.4.0-15.fc15.src.rpm
+# rpm -ivh --nomd5 ./fcgi-2.4.0-15.fc15.src.rpm 
+# cd /usr/src/redhat
+# grep ^Version /usr/src/redhat/SPECS/fcgi.spec 
+# grep ^Patch /usr/src/redhat/SPECS/fcgi.spec 
+# ll /usr/src/redhat/SOURCES/
+# grep ^BuildRequires /usr/src/redhat/SPECS/fcgi.spec 
+# cd ./SPECS/
+# time rpmbuild -bb --clean ./fcgi.spec 
+# cd ..
+# cd ./RPMS/i386/
+# rpm -ivh ./fcgi-*

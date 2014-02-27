@@ -1,0 +1,246 @@
+$ sudo yum install git tree
+$ curl -L http://www.opscode.com/chef/install.sh | sudo bash
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  6470  100  6470    0     0   7632      0 --:--:-- --:--:-- --:--:-- 17823
+Downloading Chef  for el...
+Installing Chef 
+警告: /tmp/tmp.qTmjyWzP/chef-.x86_64.rpm: ヘッダ V4 DSA/SHA1 Signature, key ID 83ef826a: NOKEY
+準備中...                ########################################### [100%]
+   1:chef                   ########################################### [100%]
+Thank you for installing Chef!
+
+$ rpm -qa |grep chef
+chef-11.4.0-1.el6.x86_64
+
+$ git clone git://github.com/opscode/chef-repo.git
+
+$ knife configure
+WARNING: No knife configuration file found
+Where should I put the config file? [/home/ec2-user/.chef/knife.rb] 
+Please enter the chef server URL: [http://localhost:4000] 
+Please enter an existing username or clientname for the API: [ec2-user] 
+Please enter the validation clientname: [chef-validator] 
+Please enter the location of the validation key: [/etc/chef/validation.pem] 
+Please enter the path to a chef repository (or leave blank): 
+*****
+
+You must place your client key in:
+  /home/ec2-user/.chef/ec2-user.pem
+Before running commands with Knife!
+
+*****
+
+You must place your validation key in:
+  /etc/chef/validation.pem
+Before generating instance data with Knife!
+
+*****
+Configuration file written to /home/ec2-user/.chef/knife.rb
+
+$ cd ./chef-repo/
+$ tree 
+.
+├── LICENSE
+├── README.md
+├── Rakefile
+├── certificates
+│   └── README.md
+├── chefignore
+├── config
+│   └── rake.rb
+├── cookbooks
+│   └── README.md
+├── data_bags
+│   └── README.md
+├── environments
+│   └── README.md
+└── roles
+    └── README.md
+
+6 directories, 10 files
+
+$ knife cookbook create hello -o cookbooks
+** Creating cookbook hello
+** Creating README for cookbook: hello
+** Creating CHANGELOG for cookbook: hello
+** Creating metadata for cookbook: hello
+
+$ tree 
+.
+├── LICENSE
+├── README.md
+├── Rakefile
+├── certificates
+│   └── README.md
+├── chefignore
+├── config
+│   └── rake.rb
+├── cookbooks
+│   ├── README.md
+│   └── hello
+│       ├── CHANGELOG.md
+│       ├── README.md
+│       ├── attributes
+│       ├── definitions
+│       ├── files
+│       │   └── default
+│       ├── libraries
+│       ├── metadata.rb
+│       ├── providers
+│       ├── recipes
+│       │   └── default.rb
+│       ├── resources
+│       └── templates
+│           └── default
+├── data_bags
+│   └── README.md
+├── environments
+│   └── README.md
+└── roles
+    └── README.md
+
+17 directories, 14 files
+
+$ vi ./cookbooks/hello/recipes/default.rb 
+$ vi ./localhost.json
+$ vi ./solo.rb
+
+$ sudo chef-solo -c solo.rb -j ./localhost.json 
+Starting Chef Client, version 11.4.0
+Compiling Cookbooks...
+Converging 1 resources
+Recipe: hello::default
+  * log[Hello , Chef!] action write
+
+Chef Client finished, 1 resources updated
+
+$ vi cookbooks/hello/recipes/default.rb 
+$ sudo chef-solo -c solo.rb -j ./localhost.json 
+Starting Chef Client, version 11.4.0
+Compiling Cookbooks...
+Converging 2 resources
+Recipe: hello::default
+  * log[Hello , Chef!] action write
+
+  * package[zsh] action install
+    - install version 4.3.10-5.6.amzn1 of package zsh
+
+Chef Client finished, 2 resources updated
+$ rpm -qa |grep zsh
+zsh-4.3.10-5.6.amzn1.x86_64
+
+$ sudo chef-solo -c solo.rb -j ./localhost.json 
+Starting Chef Client, version 11.4.0
+Compiling Cookbooks...
+Converging 2 resources
+Recipe: hello::default
+  * log[Hello , Chef!] action write
+
+  * package[zsh] action install (up to date)
+Chef Client finished, 1 resources updated
+
+$ vi cookbooks/hello/recipes/default.rb   
+$ sudo chef-solo -c solo.rb -j ./localhost.json 
+
+$ knife cookbook create nginx -o cookbooks
+** Creating cookbook nginx
+** Creating README for cookbook: nginx
+** Creating CHANGELOG for cookbook: nginx
+** Creating metadata for cookbook: nginx
+
+$ vi cookbooks/nginx/recipes/default.rb 
+$ vi cookbooks/nginx/templates/nginx.conf.erb
+$ vi localhost.json
+$ sudo chef-solo -c solo.rb -j ./localhost.json
+Starting Chef Client, version 11.4.0
+Compiling Cookbooks...
+Converging 3 resources
+Recipe: nginx::default
+  * package[nginx] action install
+    - install version 1.2.7-2.8.amzn1 of package nginx
+
+  * service[nginx] action enable
+    - enable service service[nginx]
+
+  * service[nginx] action start
+    - start service service[nginx]
+
+  * template[nginx.conf] action create
+================================================================================
+Error executing action `create` on resource 'template[nginx.conf]'
+================================================================================
+
+
+Chef::Exceptions::FileNotFound
+------------------------------
+Cookbook 'nginx' (0.1.0) does not contain a file at any of these locations:
+  templates/amazon-2013.03/nginx.conf.erb
+  templates/amazon/nginx.conf.erb
+  templates/default/nginx.conf.erb
+
+This cookbook _does_ contain: ['/home/ec2-user/chef-repo/cookbooks/nginx/templates/nginx.conf.erb']
+
+
+Resource Declaration:
+---------------------
+# In /home/ec2-user/chef-repo/cookbooks/nginx/recipes/default.rb
+
+ 18: template "nginx.conf" do
+ 19:   path "/etc/nginx.nginx.conf"
+ 20:   source "nginx.conf.erb"
+ 21:   owner "root"
+ 22:   group "root"
+ 23:   mode 0644
+ 24:   notifies :reload, 'service[nginx]'
+ 25: end
+
+
+
+Compiled Resource:
+------------------
+# Declared in /home/ec2-user/chef-repo/cookbooks/nginx/recipes/default.rb:18:in `from_file'
+
+template("nginx.conf") do
+  provider Chef::Provider::Template
+  action "create"
+  retries 0
+  retry_delay 2
+  path "/etc/nginx.nginx.conf"
+  backup 5
+  source "nginx.conf.erb"
+  cookbook_name :nginx
+  recipe_name "default"
+  owner "root"
+  group "root"
+  mode 420
+end
+
+
+
+[2013-04-10T09:45:01+00:00] ERROR: Running exception handlers
+[2013-04-10T09:45:01+00:00] ERROR: Exception handlers complete
+Chef Client failed. 3 resources updated
+[2013-04-10T09:45:01+00:00] FATAL: Stacktrace dumped to /tmp/chef-solo/chef-stacktrace.out
+[2013-04-10T09:45:01+00:00] FATAL: Chef::Exceptions::FileNotFound: template[nginx.conf] (nginx::default line 18) had an error: Chef::Exceptions::FileNotFound: Cookbook 'nginx' (0.1.0) does not contain a file at any of these locations:
+  templates/amazon-2013.03/nginx.conf.erb
+  templates/amazon/nginx.conf.erb
+  templates/default/nginx.conf.erb
+
+This cookbook _does_ contain: ['/home/ec2-user/chef-repo/cookbooks/nginx/templates/nginx.conf.erb']
+
+
+
+
+
+
+Webサーバ側からのルーティング設定で以下をVGWに向ける事
+10.1.0.0/16
+10.2.0.0/16
+10.3.0.0/16
+
+ENIは付けない
+EIP
+
+
+ELBとEIPは取得しなおし
