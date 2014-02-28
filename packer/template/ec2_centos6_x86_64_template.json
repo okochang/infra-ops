@@ -1,0 +1,47 @@
+{
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "set your access key",
+    "secret_key": "set your secret key",
+    "region": "ap-northeast-1",
+    "source_ami": "ami-31e86030",
+    "instance_type": "m1.small",
+    "ssh_username": "root",
+    "ssh_timeout": "15m",
+    "ami_name": "centos6-base-template",
+    "launch_block_device_mappings": [
+      {
+        "device_name": "/dev/sda",
+        "volume_size": 30,
+        "delete_on_termination": true
+      }
+    ],
+    "ami_block_device_mappings": [
+      {
+        "device_name": "/dev/sdb",
+        "virtual_name": "ephemeral0"
+      }
+    ],
+    "tags": {
+      "OS_Version": "CentOS6",
+      "Release": "Latest"
+    }
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sudo yum -y update",
+      "sudo resize2fs /dev/xvde",
+      "sudo ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime",
+      "sudo dd if=/dev/zero of=/var/swap.img bs=1M count=2048",
+      "sudo mkswap /var/swap.img",
+      "sudo swapon /var/swap.img",
+      "sudo echo \"/var/swap.img  swap      swap    defaults         0 0\" >> /etc/fstab",
+      "sudo service iptables stop",
+      "sudo chkconfig iptables off",
+      "sudo sed -i -e \"s/^SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config",
+      "sudo sed -i -e \"s/^PasswordAuthentication yes/PasswordAuthentication no/g\" /etc/ssh/sshd_config",
+      "sudo rm -f /root/.ssh/authorized_keys"
+    ]
+  }]
+}
