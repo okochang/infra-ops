@@ -1,0 +1,8 @@
+NameVirtualHost *:80
+<VirtualHost *:80>
+    DocumentRoot <%= node['httpd']['document_root'] %>
+    ServerName <%= node['httpd']['vhost_name'] %>
+    CustomLog logs/<%= node['httpd']['vhost_name'] %>_access_log combined
+    ErrorLog logs/<%= node['httpd']['vhost_name'] %>_error_log
+    Options FollowSymLinks
+</VirtualHost>

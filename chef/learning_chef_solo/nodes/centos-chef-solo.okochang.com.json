@@ -1,0 +1,28 @@
+{
+    "httpd":{
+        "port":80,
+        "server_admin":"root@localhost",
+        "document_root":"/var/www/html",
+        "vhost_name":"centos-chef-solo.okochang.com",
+        "ssl_port":443,
+        "cert_file":"/etc/httpd/ssl/chef-solo.okochang.com.crt",
+        "key_file":"/etc/httpd/ssl/chef-solo.okochang.com.key"
+    },
+    "zabbix-agent":{
+        "server":"ap-tokyo.kumoyuki.com",
+        "server_active":"ap-tokyo.kumoyuki.com",
+        "hostname":"centos-chef-solo.okochang.com"
+    },
+    "user":{
+        "name":"ec2-user"
+    },
+    "group":{
+        "name":"ec2-user"
+    },
+    "run_list":[
+        "recipe[httpd]",
+        "recipe[httpd::mod_ssl]",
+        "recipe[swapfile]",
+        "recipe[zabbix-agent]"
+    ]
+}
