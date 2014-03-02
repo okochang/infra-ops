@@ -1,0 +1,7 @@
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix/zabbix_agentd.log
+LogFileSize=0
+Server=<%= node['zabbix-agent']['server'] %>
+ServerActive=<%= node['zabbix-agent']['server_active'] %>
+Hostname=<%= node['zabbix-agent']['hostname'] %>
+Include=/etc/zabbix/zabbix_agentd.d/
